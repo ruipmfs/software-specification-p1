@@ -22,7 +22,6 @@ function deserialise<V>(cs : seq<Code<V>>) : Tree<V>
 
 // Ex 2
 
-
 // Ex 3 
 
 // Ex 4 
