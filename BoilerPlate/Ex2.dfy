@@ -47,24 +47,26 @@ method mergeArr(a: array<int>, l: int, m: int, r: int)
   var rightSegment := copyArr(a, m, r);
 
   var i, j := 0, 0;
+  var cur := l;
 
-  while (i < leftSegment.Length || j < rightSegment.Length)
+  while ((i < leftSegment.Length || j < rightSegment.Length) && cur < r)
     invariant 0 <= i <= leftSegment.Length
     invariant 0 <= j <= rightSegment.Length
-    invariant sorted(a[l..l+i+j])
+    invariant l <= cur <= r
+    invariant cur == l+i+j
+    invariant l != cur ==> sorted(a[l..cur]) && (a[cur-1] <= a[cur])
     invariant forall k :: 0 <= k < l ==> a[k] == old(a[k])
-    invariant forall k :: l+i+j <= k < a.Length ==> a[k] == old(a[k])
-    decreases leftSegment.Length - i + rightSegment.Length - j
+    invariant forall k :: cur <= k < a.Length ==> a[k] == old(a[k])
+    decreases r - cur
   {
-    if (i < leftSegment.Length) {
-      if (j >= rightSegment.Length || leftSegment[i] <= rightSegment[j]){
-        a[l+i+j] := leftSegment[i];
-        i := i + 1;
-      }
+    if (i < leftSegment.Length && (j >= rightSegment.Length || leftSegment[i] <= rightSegment[j])) {
+      a[cur] := leftSegment[i];
+      i := i + 1;
     } else {
-      a[l+i+j] := rightSegment[j];
+      a[cur] := rightSegment[j];
       j := j + 1;
     }
+    cur := cur + 1;
   }
 }
 
@@ -76,7 +78,7 @@ method sort (a : array<int>)
 {
   // ToDo
 }
-
+/*
 method mergeSort (a : array<int>) 
   ensures sorted(a[..])
   modifies a 
@@ -89,6 +91,7 @@ method mergeSort (a : array<int>)
     mergeArr(a, l, m ,r);
   }
 }
+*/
 
 
 
