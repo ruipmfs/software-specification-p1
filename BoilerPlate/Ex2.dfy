@@ -25,15 +25,6 @@ method copyArr(a : array<int>, l : int, r : int) returns (ret : array<int>)
 
 
 // Ex2
-method swap(a: array<int>, i: int, j: int)
-requires 0 <= i < a.Length && 0 <= j < a.Length
-ensures old(a[i]) == a[j] && old(a[j]) == a[i]
-ensures forall k:: 0 <= k < a.Length && k != i && k != j ==> old(a[k]) == a[k]
-ensures multiset(a[..]) == multiset(old(a[..]))
-modifies a
-{
-    a[i], a[j] := a[j], a[i];
-}
 
 method mergeArr(a: array<int>, l: int, m: int, r: int)
   requires 0 <= l < m < r <= a.Length
@@ -54,7 +45,10 @@ method mergeArr(a: array<int>, l: int, m: int, r: int)
     invariant 0 <= j <= rightSegment.Length
     invariant l <= cur <= r
     invariant cur == l+i+j
-    invariant l != cur ==> sorted(a[l..cur]) && (a[cur-1] <= a[cur])
+    invariant sorted(leftSegment[..]) && sorted(rightSegment[..])
+    invariant 0 <= i < leftSegment.Length && cur > l ==> leftSegment[i] >= a[cur -1]
+    invariant  cur > l && 0 <= j < rightSegment.Length  ==> rightSegment[j] >= a[cur -1] 
+    invariant sorted(a[l..cur])
     invariant forall k :: 0 <= k < l ==> a[k] == old(a[k])
     invariant forall k :: cur <= k < a.Length ==> a[k] == old(a[k])
     decreases r - cur
@@ -72,26 +66,22 @@ method mergeArr(a: array<int>, l: int, m: int, r: int)
 
 
 // Ex3
-method sort (a : array<int>) 
-  ensures sorted(a[..])
-  modifies a 
-{
-  // ToDo
-}
-/*
-method mergeSort (a : array<int>) 
+/*method mergeSort (a : array<int>) 
   ensures sorted(a[..])
   modifies a 
 {
   var l, r := 0, a.Length-1;
   if l < r {
     var m := (l+r)/2;
-    mergeSort(a[l..m]);
-    mergeSort(a[m+1..l]);
+    mergeSort(copyArr(a,l,m));
+    mergeSort(copyArr(a,m+1,l));
+
+    /*mergeSort(a[l..m]);
+    mergeSort(a[m+1..l]);*/
     mergeArr(a, l, m ,r);
   }
-}
-*/
+}*/
+
 
 
 
