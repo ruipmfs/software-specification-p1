@@ -55,15 +55,21 @@ class Node {
   method reverse(tail : Node?) returns (r : Node)
     requires this.Valid()
     requires tail != null ==> tail.Valid()
-    ensures this.next != null ==> this.list == [this.data] + this.next.list
-    ensures this.Valid()
+    ensures this.next != null ==> this !in this.next.footprint
+    ensures  this.Valid() 
     ensures r.Valid()
-    ensures r.list == reverseList(old(this.list))
-    ensures this.next != null ==> this.next.footprint >= old(this.footprint)
-    decreases this.footprint
+
+    //ensures this.next != null ==> this.next.footprint >= old(this.footprint)
+    ensures tail != null ==> r.footprint >= tail.footprint
+    ensures tail != null && this.next == null ==> reverseList(old(this.list)) + tail.list == r.list
+    //ensures this.next == null ==> this.list == r.list
+    //decreases footprint
+    modifies this.next, this.footprint
   {
+   
     var old_next := this.next; 
     this.next := tail;
+     /*
     if (this.next == null) {
       this.list := [this.data];
       this.footprint := { this };
@@ -71,13 +77,30 @@ class Node {
       this.list := [this.data] + tail.list;
       this.footprint := {this} + tail.footprint;
     }
-    
+    */
+
     if (old_next == null) {
-      r := this; 
+      r := this;
+      if (tail != null) {
+        this.list := [this.data] + tail.list;
+        this.footprint := { this } + tail.footprint;
+      }
+      else {
+        this.list := [this.data];
+        this.footprint := { this };
+      }
       return; 
     } else {
+      if (tail != null) {
+        this.list := [this.data] + tail.list;
+        this.footprint := { this } + tail.footprint;
+      }
+      else {
+        this.list := [this.data];
+        this.footprint := { this };
+      }
       r := old_next.reverse(this);
-      return;  
+      return;
     }
   }
 
@@ -91,7 +114,6 @@ class Node {
 
   // Ex2
   method ExtendList(nd : Node?, v : int) returns (r : Node)
-    //requires nd != null ==> v !in nd.list
     requires nd != null ==> nd.Valid()
     ensures r.Valid()
     ensures fresh(r)
