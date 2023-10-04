@@ -33,7 +33,8 @@ function deserialise<T>(s:seq<Code<T>>):seq<Tree<T>>
   deserialiseAux(s, [])
 }
 
-method testSerializeWithAnEmptyTree()
+// Ex 2
+method testSerializeWithASingleLeaf()
 {
   var tree := Leaf(42);
   var result := serialise(tree);
@@ -56,6 +57,25 @@ method testSerializeWithAllElements()
   assert codes == expectedCodes;
 }
 
+// Ex 3 
+
+method testDeseraliseWithASingleLeaf() {
+  var codes: seq<Code<int>> := [CLf(9)];
+  var trees := deserialise(codes);
+  assert |trees| == 1;
+  var expectedTree := Leaf(9);
+  assert trees[0] == expectedTree;
+}
+
+method testDeserializeWithASingleNode()
+{
+  var codes: seq<Code<int>> := [CLf(3), CSNd(9)];
+  var trees := deserialise(codes);
+  assert |trees| == 1;
+  var expectedTree := SingleNode(9, Leaf(3));
+  assert trees[0] == expectedTree;
+}
+
 method testDeserialiseWithAllElements()
 {
     var codes: seq<Code<int>> := [CLf(3), CSNd(4), CLf(5), CDNd(2), CLf(6), CDNd(9)];
@@ -64,10 +84,6 @@ method testDeserialiseWithAllElements()
     var expectedTree := DoubleNode(9, Leaf(6), DoubleNode(2, Leaf(5), SingleNode(4, Leaf(3))));
     assert trees[0] == expectedTree;
 }
-
-// Ex 2
-
-// Ex 3 
 
 // Ex 4 
 
