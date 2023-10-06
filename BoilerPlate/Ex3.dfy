@@ -62,8 +62,8 @@ class Node {
     ensures tail != null ==> r.list == reverseList(old(this.list)) + old(tail.list)
 
     //Valid 
-    ensures /*this.next !=null && this !in this.next.footprint ==>*/ this.Valid()
-    ensures /*r.next !=null && r !in r.next.footprint ==>*/ r.Valid()
+    ensures this.Valid()
+    ensures r.Valid()
 
     modifies this.next ,this.footprint
     decreases footprint 
@@ -93,7 +93,6 @@ class Node {
         this.footprint := { this };
       }
       r := old_next.reverse(this);
-      
       return;
     }
   }
