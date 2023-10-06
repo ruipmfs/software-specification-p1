@@ -51,36 +51,28 @@ class Node {
   }
 
 
-  // Ex1
   method reverse(tail : Node?) returns (r : Node)
+    //requires 
     requires this.Valid()
     requires tail != null ==> tail.Valid()
-    ensures this.next != null ==> this !in this.next.footprint
-    ensures  this.Valid() 
-    ensures r.Valid()
+    requires tail != null ==> this.footprint !! tail.footprint
 
-    //ensures this.next != null ==> this.next.footprint >= old(this.footprint)
-    ensures tail != null ==> r.footprint >= tail.footprint
-    ensures tail != null && this.next == null ==> reverseList(old(this.list)) + tail.list == r.list
-    //ensures this.next == null ==> this.list == r.list
-    //decreases footprint
-    modifies this.next, this.footprint
+    //list
+    ensures tail == null ==> r.list == reverseList(old(this.list))
+    ensures tail != null ==> r.list == reverseList(old(this.list)) + old(tail.list)
+
+    //Valid 
+    ensures /*this.next !=null && this !in this.next.footprint ==>*/ this.Valid()
+    ensures /*r.next !=null && r !in r.next.footprint ==>*/ r.Valid()
+
+    modifies this.next ,this.footprint
+    decreases footprint 
   {
-   
+
     var old_next := this.next; 
     this.next := tail;
-     /*
-    if (this.next == null) {
-      this.list := [this.data];
-      this.footprint := { this };
-    } else {
-      this.list := [this.data] + tail.list;
-      this.footprint := {this} + tail.footprint;
-    }
-    */
 
     if (old_next == null) {
-      r := this;
       if (tail != null) {
         this.list := [this.data] + tail.list;
         this.footprint := { this } + tail.footprint;
@@ -89,6 +81,7 @@ class Node {
         this.list := [this.data];
         this.footprint := { this };
       }
+      r := this;
       return; 
     } else {
       if (tail != null) {
@@ -100,16 +93,12 @@ class Node {
         this.footprint := { this };
       }
       r := old_next.reverse(this);
+      
       return;
     }
   }
 
-  function reverseList(lst: seq<int>) : (reversed: seq<int>)
-  decreases |lst|
-  {
-    if (lst == []) then []
-    else (reverseList(lst[1..]) + [lst[0]])
-  }
+
 }
 
   // Ex2
@@ -127,4 +116,14 @@ class Node {
       return;
     }
   }
+
+  function reverseList(lst: seq<int>) : seq<int>
+    decreases |lst|
+    {
+    if |lst| == 0 then []
+    else reverseList(lst[1..]) + [lst[0]]
+    }
+
+
 }
+
