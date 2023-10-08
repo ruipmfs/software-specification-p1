@@ -65,26 +65,28 @@ method mergeArr(a: array<int>, l: int, m: int, r: int)
 }
 
 
-// Ex3
-/*method mergeSort (a : array<int>) 
+method mergeSort(a: array<int>)
   ensures sorted(a[..])
-  modifies a 
+  modifies a
 {
-  var l, r := 0, a.Length-1;
-  if l < r {
-    var m := (l+r)/2;
-    mergeSort(copyArr(a,l,m));
-    mergeSort(copyArr(a,m+1,l));
+  mergeSortAux(a, 0, a.Length);
+}
 
-    /*mergeSort(a[l..m]);
-    mergeSort(a[m+1..l]);*/
-    mergeArr(a, l, m ,r);
+method mergeSortAux(a: array<int>, l: int, r: int)
+  requires 0 <= l <= r <= a.Length
+  ensures sorted(a[l..r])
+  ensures a[..l] == old(a[..l])
+  ensures a[r..] == old(a[r..])
+  modifies a
+  decreases r - l // Valid decreasing expression
+{
+  if (r - l <= 1) {
+    return; // Base case: array segment has only one element (sorted by definition).
   }
-}*/
 
+  var m : int := l + (r - l) / 2; // Calculate the midpoint of the segment.
 
-
-
-
-
-
+  mergeSortAux(a, l, m); // Recursively sort the left half.
+  mergeSortAux(a, m, r); // Recursively sort the right half.
+  mergeArr(a, l, m, r); // Merge the two sorted halves.
+}
