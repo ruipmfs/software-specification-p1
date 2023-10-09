@@ -103,6 +103,10 @@ class Node {
   // Ex2
   method ExtendList(nd : Node?, v : int) returns (r : Node)
     requires nd != null ==> nd.Valid()
+    ensures nd != null ==> r.list == [ v ] + nd.list
+    ensures nd != null ==> r.footprint == { r } + nd.footprint
+    ensures nd == null ==> r.list == [ v ] 
+    ensures nd == null ==> r.footprint == { r } 
     ensures r.Valid()
     ensures fresh(r)
   {
