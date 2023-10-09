@@ -17,26 +17,27 @@ class Queue {
   {
     (lst1 == null && lst2 == null ==> footprint == {}) &&
     (lst1 != null && lst2 != null ==>
-      footprint == (lst1.footprint + lst2.footprint) && 
+      footprint == (lst2.footprint + lst1.footprint) && 
       lst1.Valid() && 
       lst2.Valid() && 
-      (lst1.footprint !! lst2.footprint) &&
-      lst1.list + lst2.list == []
+      (lst1.footprint !! lst2.footprint)
     ) &&
     (lst1 == null && lst2 != null ==> 
       footprint == lst2.footprint &&
-      lst2.Valid() &&
-      lst2.list == []
+      lst2.Valid()
     ) &&
     (lst1 != null && lst2 == null ==>
       footprint == lst1.footprint &&
-      lst1.Valid() &&
-      lst1.list == []
+      lst1.Valid()
     )
   }
 
   // Ex2 
-  constructor () 
+  constructor ()
+    ensures Valid()
+    && lst1 == null
+    && lst2 == null
+    && footprint == {}
   {
     this.lst1 := null; 
     this.lst2 := null;
@@ -45,28 +46,27 @@ class Queue {
 
   // Ex3.1
   method push(val : int)
-    requires lst1 != null ==> lst1.Valid()
     requires Valid()
-    ensures lst1 != null ==> lst1.Valid()
-    //ensures Valid()
+    ensures Valid()
+    ensures fresh(lst1)
+    ensures this.footprint == {lst1} + old(this.footprint)
     modifies lst1, this, footprint
   {
     lst1 := Ex3.ExtendList(lst1, val);
     if (old(lst1) == null) {
-      this.footprint := this.footprint + lst1.footprint;
+      this.footprint := lst1.footprint + this.footprint;
     }
-    else {    
-      this.footprint := this.footprint + (lst1.footprint - old(lst1.footprint));
+    else {
+      this.footprint := (lst1.footprint - old(lst1.footprint)) + this.footprint;
     }
   }
 
   // Ex3.2
   method pop() returns (r : int)
     requires Valid()
-    requires lst2 != null ==> lst2.Valid()
-    requires lst2 == null ==> lst1 != null && lst1.Valid()
+    requires lst1 != null || lst2 != null // to pop a node, we need at least one node in at least one list
     ensures Valid()
-    ensures lst2 != null ==> lst2.Valid()
+    ensures old(lst2) != null ==> this.footprint == old(this.footprint) - {old(lst2)}
     modifies this, footprint, lst2, lst1
   {
     if (lst2 == null) {
@@ -76,12 +76,7 @@ class Queue {
     }
 
     r := lst2.data;
-    if (lst2.next != null) {
-      this.footprint := this.footprint - (lst2.footprint - lst2.next.footprint);
-    }
-    else {
-      this.footprint := this.footprint - lst2.footprint;
-    }
+    this.footprint := this.footprint - { lst2 };
     lst2 := lst2.next;
   }
 }

@@ -158,8 +158,8 @@ lemma DeserialisetAfterSerialiseLemma<T> (t : Tree<T>, cds : seq<Code<T>>, ts : 
             deserialiseAux([ CDNd(x) ] + cds, (ts + [ t2 ]) + [t1]);
           ==
             deserialiseAux([ CDNd(x) ] + cds, ts + [t2, t1]);
-
-          == deserialiseAux([CDNd(x)] + cds, ts + [t2 , t1]);
+          == 
+            deserialiseAux([CDNd(x)] + cds, ts + [t2 , t1]);
           == 
             deserialiseAux(cds, ts + [DoubleNode(x,t1,t2)]); 
           == 

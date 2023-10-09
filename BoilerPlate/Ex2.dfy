@@ -78,15 +78,15 @@ method mergeSortAux(a: array<int>, l: int, r: int)
   ensures a[..l] == old(a[..l])
   ensures a[r..] == old(a[r..])
   modifies a
-  decreases r - l // Valid decreasing expression
+  decreases r - l
 {
   if (r - l <= 1) {
-    return; // Base case: array segment has only one element (sorted by definition).
+    return;
   }
 
-  var m : int := l + (r - l) / 2; // Calculate the midpoint of the segment.
+  var m : int := l + (r - l) / 2;
 
-  mergeSortAux(a, l, m); // Recursively sort the left half.
-  mergeSortAux(a, m, r); // Recursively sort the right half.
-  mergeArr(a, l, m, r); // Merge the two sorted halves.
+  mergeSortAux(a, l, m);
+  mergeSortAux(a, m, r);
+  mergeArr(a, l, m, r);
 }
