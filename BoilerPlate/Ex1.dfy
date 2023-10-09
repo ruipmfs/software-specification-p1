@@ -88,42 +88,82 @@ method testDeserialiseWithAllElements()
 }
 
 // Ex 4 
-
 lemma SerialiseLemma<V>(t: Tree<V>)
-  requires true // Specify any necessary preconditions here
   ensures deserialise(serialise(t)) == [t]
 {
-  match t {
-    case Leaf(x) =>
-      calc {
-        deserialise(serialise(t));
-        == deserialise([CLf(x)]); // Using the definition of serialise for Leaf
-        == deserialiseAux([CLf(x)], []); // Reference case for deserialiseAux
-        == [Leaf(x)]; // Using the definition of deserialise for a single Code<Leaf>
-      }
+  assert serialise(t) + [] == serialise(t);
 
-    case SingleNode(v, t1) =>
-      calc {
-        deserialise(serialise(t));
-        == deserialise(serialise(SingleNode(v, t1)));
-        == deserialise(serialise(t1) + [CSNd(v)]); 
-        == deserialiseAux(serialise(t1) + [CSNd(v)], []); 
-        ==  [SingleNode(v, deserialise(serialise(t1))[0])]; 
-        == [SingleNode(v, t1)];
-
-      }
-
-    case DoubleNode(v, t1, t2) =>
-      calc {
-        deserialise(serialise(t));
-        == deserialise(serialise(DoubleNode(v, t1, t2)));
-        == deserialise(serialise(t2) + serialise(t1) + [CDNd(v)]); 
-        == deserialiseAux(serialise(t2) + serialise(t1) + [CDNd(v)], []); 
-        == [DoubleNode(v, deserialise(serialise(t1))[0], deserialise(serialise(t2))[0])]; 
-        == [DoubleNode(v, t1, t2)]; 
-      }
+  calc{
+    deserialise(serialise(t));
+    ==
+    deserialise(serialise(t) + []);
+    ==
+    deserialiseAux(serialise(t) + [], []);
+    == { DeserialisetAfterSerialiseLemma(t, [], []); }
+    deserialiseAux([],[] + [t]);
+    ==
+    deserialiseAux([],[t]);
+    == 
+    [t];
   }
 }
 
 
+lemma DeserialisetAfterSerialiseLemma<T> (t : Tree<T>, cds : seq<Code<T>>, ts : seq<Tree<T>>) 
+  ensures deserialiseAux(serialise(t) + cds, ts) == deserialiseAux(cds, ts + [t])
+  {
+    match t{
+      case Leaf(x) =>
+        calc{
+          deserialiseAux(serialise(t) + cds, ts);
+          ==
+            deserialiseAux([CLf(x)] + cds, ts);
+          == 
+            deserialiseAux(cds, ts + [Leaf(x)]);
+          == 
+            deserialiseAux(cds, ts + [t]);
+        }
+      case SingleNode(x,t1) =>
+        assert serialise(t1) + [ CSNd(x) ] + cds ==  serialise(t1) + ([ CSNd(x) ] + cds);
+        calc{
+          deserialiseAux(serialise(t) + cds, ts);
+          ==
+            deserialiseAux( serialise(t1) + [CSNd(x)] + cds ,ts); 
+          ==
+            deserialiseAux((serialise(t1) + [CSNd(x)] + cds),ts);
+          == { DeserialisetAfterSerialiseLemma(t1 , [ CSNd(x) ], ts); }
+            deserialiseAux(serialise(t1)+ [CSNd(x)]  + cds, ts );
+          ==
+            deserialiseAux( ([CSNd(x)] + cds), ts + [ t1 ]);
+          == 
+            deserialiseAux(cds, ts + [SingleNode(x,t1)]);
+          == 
+            deserialiseAux(cds, ts + [t]); 
+        }
+      case DoubleNode(x,t1,t2) =>
+        assert serialise(t2) + serialise(t1) + [ CDNd(x) ] + cds == serialise(t2) + (serialise(t1) + [ CDNd(x) ] + cds);
+        assert serialise(t1) + [CDNd(x)] + cds == serialise(t1) + ([CDNd(x)] + cds); 
+        assert  (ts + [ t2 ]) +  [ t1 ] == ts + [t2,t1];
+        calc{
+          deserialiseAux(serialise(t) + cds, ts);
+          ==
+            deserialiseAux(serialise(t2) + serialise(t1) + [CDNd(x)] + cds ,ts); 
+          ==
+            deserialiseAux(serialise(t2) + (serialise(t1) + [CDNd(x)] + cds),ts);
+          == { DeserialisetAfterSerialiseLemma(t2, serialise(t1) + [ CDNd(x) ], ts); }
+            deserialiseAux(serialise(t1)+ [CDNd(x)]  + cds, ts + [ t2 ]);
+          ==
+            deserialiseAux(serialise(t1) + ([CDNd(x)] + cds), ts + [ t2 ]);
+          == { DeserialisetAfterSerialiseLemma(t1, [ CDNd(x) ] + cds, ts + [ t2 ]); }
+            deserialiseAux([ CDNd(x) ] + cds, (ts + [ t2 ]) + [t1]);
+          ==
+            deserialiseAux([ CDNd(x) ] + cds, ts + [t2, t1]);
 
+          == deserialiseAux([CDNd(x)] + cds, ts + [t2 , t1]);
+          == 
+            deserialiseAux(cds, ts + [DoubleNode(x,t1,t2)]); 
+          == 
+            deserialiseAux(cds, ts + [t]);
+        }
+    }
+  }
